@@ -371,6 +371,10 @@ function hotspot(s, name, arg, sel) {
         f.clockSolved = true;
         return { sfx: 'chime', fx: 'clock' };
       }
+      // the sketch, copied hand for hand: the most natural wrong answer, so it gets a reply
+      if (s.clock.h === DRAWN_CLOCK.h && s.clock.m === DRAWN_CLOCK.m) {
+        return { sfx: 'tick', fx: 'hand', at: name === 'knobH' ? 'h' : 'm', msg: 'Exactly as he drew it, and nothing happens. But he drew it from his chair, looking at the window.' };
+      }
       return { sfx: 'tick', fx: 'hand', at: name === 'knobH' ? 'h' : 'm' };
     case 'clock/drum':
       if (sel) return {};

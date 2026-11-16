@@ -369,8 +369,17 @@ function kLock(s, fx, q) {
 }
 
 function kBottle(s, fx) {
-  const f = s.f;
-  const a = `<g class="${fx === 'flip' ? 'fx-flip' : ''}" style="transform-origin:200px 250px">` + rendered('bottle', { bottle: !f.pageOut ? 'paper' : !f.pageTaken ? 'out' : 'empty' }, s, fx, true) + '</g>';
+  const f = s.f, m = M3.bottle, r = m.regions.bottle.rect;
+  let a;
+  if (fx === 'flip') {
+    // only the bottle turns over: the shelf stays where it is, the paper is there when it comes back
+    const hb = m.hots.bottle, cx = hb[0] + hb[2] / 2, cy = hb[1] + hb[3] / 2;
+    a = rendered('bottle', { bottle: 'none' }, s, fx, true) +
+      `<g class="fx-flipout" style="transform-origin:${n(cx)}px ${n(cy)}px">${pic('bottle_sprite_bottle_lit', r)}</g>` +
+      `<g class="fx-flipin">${pic('bottle_bottle_out_lit', r)}</g>`;
+  } else {
+    a = rendered('bottle', { bottle: !f.pageOut ? 'paper' : !f.pageTaken ? 'out' : 'empty' }, s, fx, true);
+  }
   let h = hot3('bottle', 'bottle');
   if (f.pageOut && !f.pageTaken) h += hot3('bottle', 'page');
   return { art: a, hots: h, glow: [-80, 200, 420], noNight: true, soft: true };
@@ -489,7 +498,8 @@ function kRings(s, fx, q) {
 
 // Every picture file, so the game can fetch them before they are needed.
 export function pictureFiles() {
-  const out = [];
+  const out = ITEM_NAMES.map((i) => `art3d/icon_${i}.webp`);
+  out.push('art3d/bottle_sprite_bottle_lit.webp');
   for (const [view, m] of Object.entries(M3)) {
     for (const tone of m.tones || ['lit', 'dark']) {
       out.push(`art3d/${view}_${tone}.webp`);
@@ -553,19 +563,8 @@ export function blinkCSS() {
   return css;
 }
 
+export const ITEM_NAMES = ['matches', 'jar', 'lens', 'crank', 'oil', 'page', 'drum', 'hkey', 'key'];
 export function icon(item) {
-  const svg = (b) => `<svg viewBox="0 0 40 40" aria-hidden="true">${b}</svg>`;
-  switch (item) {
-    case 'matches': return svg(R(6, 11, 28, 18, 'red', '', 0.6) + R(6, 16, 28, 8, 'paper', '', 0.4) + C(20, 20, 2.6, 'brass'));
-    case 'jar': return svg(R(11, 12, 18, 23, 'glass', '', 0.5) + R(13, 22, 14, 12, '#5F9C9A', '', 0.4) + R(10, 6, 20, 6, 'brass2', '', 0.4) + C(17, 27, 1.4, 'phos') + C(23, 30, 1.1, 'phos') + C(21, 25, 0.9, 'phos'));
-    case 'page': return svg(P([[13, 5], [31, 6], [32, 35], [11, 34], [14, 27], [10, 20], [14, 13]], 'paper', '', 0.5) + S('M12 20 a11 11 0 0 1 11 -11', 'ink', 1.6) + L(13, 20, 22, 25, 'ink', 1.8));
-    case 'lens': return svg(C(20, 20, 14, 'brass2') + C(20, 20, 10.5, 'fog') + P([[14, 14], [19, 12], [17, 18]], 'paper', '', 0.3));
-    case 'crank': return svg(S('M9 28 h18 v-15', 'brass', 4.5) + C(27, 11, 5, 'brass') + C(9, 28, 3.6, 'brass2'));
-    case 'oil': return svg(P([[9, 34], [27, 34], [24, 16], [12, 16]], 'brass2', '', 0.5) + L(23, 18, 35, 8, 'brass2', 3) + C(18, 14, 3.4, 'brass') + L(13, 20, 14, 31, 'brass3', 1.4));
-    case 'drum': return svg(R(6, 13, 28, 14, 'brass', '', 0.4) + C(11, 18, 1.2, 'ink') + C(17, 23, 1.2, 'ink') + C(22, 17, 1.2, 'ink') + C(28, 22, 1.2, 'ink') + C(14, 21, 1.2, 'ink') + C(25, 20, 1.2, 'ink'));
-    case 'hkey': return svg(O(13, 20, 5, 'brass', 3) + B(18, 18.6, 14, 2.8, 'brass') + B(27, 21, 2.6, 4.5, 'brass'));
-    case 'key': return svg(O(11, 20, 7, 'brass', 4.5) + B(18, 17.8, 18, 4.4, 'brass') + B(27, 22, 4, 7, 'brass') + B(33, 22, 3, 5, 'brass'));
-  }
-  return '';
+  return `<img src="art3d/icon_${item}.webp" alt="" draggable="false">`;
 }
 

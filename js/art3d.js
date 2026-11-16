@@ -1137,14 +1137,15 @@ export const M3 = {
    "bottle": {
     "rect": [
      0.0,
-     56.5,
-     365.5,
-     373.5
+     38.5,
+     372.0,
+     391.5
     ],
     "states": [
      "paper",
      "out",
-     "empty"
+     "empty",
+     "none"
     ]
    }
   },
