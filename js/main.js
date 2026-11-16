@@ -107,7 +107,8 @@ function burst(color) {
     dot.animate(
       [{ transform: 'translate(0,0) scale(1)', opacity: 1 }, { transform: `translate(${Math.cos(a) * far}px, ${Math.sin(a) * far - 14}px) scale(0.2)`, opacity: 0 }],
       { duration: 520 + Math.random() * 260, easing: 'cubic-bezier(0.1, 0.7, 0.3, 1)' },
-    ).onfinish = () => dot.remove();
+    );
+    setTimeout(() => dot.remove(), 820);
   }
   el.stage.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.014)' }, { transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
 }
@@ -128,7 +129,9 @@ function flyToTray(item) {
   ghost.animate(
     [{ transform: 'translate(0,0) scale(1.9)' }, { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 50}px) scale(1.5)`, offset: 0.5 }, { transform: `translate(${dx}px, ${dy}px) scale(1)` }],
     { duration: 480, easing: 'cubic-bezier(0.4, 0, 0.3, 1)' },
-  ).onfinish = () => { ghost.remove(); slot.style.opacity = ''; };
+  );
+  // tidy up on a timer too: an animation that is paused (screen off, tab hidden) never reports that it finished
+  setTimeout(() => { ghost.remove(); slot.style.opacity = ''; }, 520);
 }
 
 function doAct(id, fxAfter) {
