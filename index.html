@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Saltlight</title>
+<meta name="description" content="An escape room in a lighthouse.">
+<meta name="theme-color" content="#0B2028">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Saltlight">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="app" id="app">
+
+  <header class="bar">
+    <button class="quiet" id="hintBtn" type="button">Hint</button>
+    <button class="quiet" id="notesBtn" type="button">Notes</button>
+    <button class="quiet" id="soundBtn" type="button" aria-pressed="true">Sound on</button>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="scene" id="scene"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <button class="nav prev" id="prev" type="button" aria-label="Turn left">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
+    </button>
+    <button class="nav next" id="next" type="button" aria-label="Turn right">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>
+    </button>
+    <button class="nav back" id="back" type="button" aria-label="Step back">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9l8 8 8-8"/></svg>
+    </button>
+    <div class="flash" id="flash" aria-hidden="true"></div>
+  </div>
+
+  <p class="caption" id="caption" aria-live="polite"></p>
+
+  <div class="tray" id="inv" role="toolbar" aria-label="What you carry"></div>
+
+  <section class="cover" id="title">
+    <img class="cover-pic" src="art3d/outside_dark.webp" alt="A lighthouse at night, its light out">
+    <h1>Saltlight</h1>
+    <p class="sub">Grandad is gone. The door is locked.</p>
+    <button class="go" id="beginBtn" type="button">Begin</button>
+    <button class="quiet" id="resetBtn" type="button" hidden>Start over</button>
+  </section>
+
+  <section class="cover" id="end" hidden>
+    <img class="cover-pic" src="art3d/outside_lit.webp" alt="The lighthouse at dawn, its light burning, a small boat coming home">
+    <h1>Out.</h1>
+    <p class="sub" id="endLine"></p>
+    <p class="sub small">The great light swings out over the water. Far off, a small boat turns towards it.</p>
+    <button class="go" id="againBtn" type="button">Play again</button>
+  </section>
+
+  <div class="sheet center" id="note" hidden>
+    <p class="paper" id="noteText"></p>
+    <button class="quiet" id="noteClose" type="button">Keep it</button>
+  </div>
+
+  <div class="sheet center" id="notes" hidden>
+    <div class="notes-list" id="notesList"></div>
+    <button class="quiet" id="notesClose" type="button">Back to the room</button>
+  </div>
+
+  <div class="sheet" id="hint" hidden>
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="hintTitle">
+      <h2 id="hintTitle">Stuck?</h2>
+      <p id="hintNudge" hidden></p>
+      <p id="hintAnswer" class="answer" hidden></p>
+      <button class="go" id="hintMore" type="button">Give me a nudge</button>
+      <button class="quiet" id="hintClose" type="button">Back to the room</button>
+    </div>
+  </div>
+
+</main>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

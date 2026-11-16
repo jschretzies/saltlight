@@ -1,0 +1,11 @@
+{
+  "name": "Saltlight",
+  "short_name": "Saltlight",
+  "description": "An escape room in a lighthouse keeper's room.",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B2028",
+  "theme_color": "#0B2028",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
