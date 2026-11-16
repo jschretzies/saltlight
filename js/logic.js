@@ -82,7 +82,7 @@ export function newState() {
     inv: [],
     sel: null,
     f: {},
-    clock: { h: 3, m: 0 },
+    clock: { h: 2, m: 10 },   // not 3 o'clock: mirrored, that puts both hands behind the bars of the window
     dials: [0, 0, 0],
     sliders: [2, 2, 2, 2, 2],
     rings: [0, 0, 0, 0],

@@ -121,21 +121,6 @@ function glowMark(s, fx) {
 
 // ---------- wall 1: the window
 
-function seaView(x, y, w, h, horizon) {
-  let o = B(x, y, w, h, 'sky');
-  o += C(x + w * 0.78, y + h * 0.24, 20, 'moon') + C(x + w * 0.78 + 7, y + h * 0.24 - 5, 15, '#DDE5D8');
-  for (const [sx, sy] of [[0.1, 0.14], [0.28, 0.3], [0.44, 0.1], [0.58, 0.36], [0.92, 0.5], [0.2, 0.46]]) o += C(x + w * sx, y + h * sy, 1.1, 'moon', 'class="twinkle"');
-  o += P([[x, y + h * 0.36], [x + w * 0.3, y + h * 0.3], [x + w * 0.55, y + h * 0.38], [x + w * 0.42, y + h * 0.45], [x, y + h * 0.48]], 'ink', 'opacity="0.8"', 0.8);
-  o += B(x, horizon, w, y + h - horizon, 'sea');
-  const r = rng(77);
-  for (let i = 0; i < 12; i++) {
-    const wx = x + w * (0.56 + r() * 0.36), wy = horizon + 6 + i * ((y + h - horizon - 10) / 12), ww = 16 + r() * 44;
-    o += R(wx - ww / 2, wy, ww, 3, 'moon', `class="shimmer" style="animation-delay:${n(-r() * 4)}s"`, 0.6);
-  }
-  for (let i = 0; i < 5; i++) o += R(x + 10 + r() * w * 0.4, horizon + 12 + r() * (y + h - horizon - 24), 14 + r() * 24, 2.6, 'moon', 'opacity="0.55"', 0.6);
-  return o;
-}
-
 // ---------- close-ups in the room
 
 // The last entry in the log.
@@ -148,23 +133,6 @@ const LOG = [
 
 const beamDir = (s) => DIRS[s.beam];
 
-
-// What the beam finds out there, one sight per direction.
-function sight(dir) {
-  const name = SIGHTS[dir];
-  const board = (x, y) => C(x, y, 19, 'paper') + O(x, y, 19, 'ink', 2) + sign(name, x, y, 0.9, 'ink');
-  switch (dir) {
-    case 'N': // a wreck, mast still standing
-      return P([[120, 300], [286, 286], [262, 322], [144, 326]], '#0A1D24') + L(200, 300, 222, 196, '#0A1D24', 6) + L(180, 232, 250, 220, '#0A1D24', 4) + S('M150 300 q20 -30 60 -34', '#0A1D24', 3) + board(238, 172);
-    case 'E': // a stack of rock with a painted mark
-      return P([[140, 326], [158, 250], [190, 214], [232, 222], [258, 268], [270, 326]], '#0A1D24') + P([[176, 250], [196, 226], [222, 232], [214, 262]], '#17363F') + board(206, 276);
-    case 'S': // the pier beacon
-      return B(120, 300, 170, 9, '#0A1D24') + B(136, 306, 7, 30, '#0A1D24') + B(266, 306, 7, 30, '#0A1D24') + B(200, 306, 7, 30, '#0A1D24') + B(214, 196, 8, 106, '#0A1D24') + P([[204, 196], [232, 196], [226, 178], [210, 178]], '#0A1D24') + board(218, 236);
-    case 'W': // a bell buoy
-      return P([[160, 318], [260, 318], [240, 276], [180, 276]], '#0A1D24') + L(184, 276, 204, 206, '#0A1D24', 5) + L(236, 276, 216, 206, '#0A1D24', 5) + L(196, 232, 224, 232, '#0A1D24', 4) + C(210, 200, 9, '#0A1D24') + board(210, 256);
-  }
-  return '';
-}
 
 // ---------- the room as rendered pictures
 //
@@ -229,17 +197,25 @@ function r1(s, fx) {
   // everything inside is drawn on the old 256 x 180 window and stretched to fit
   let view = '';
   if (s.lit) {
-    // a lit window is a mirror: the room behind you, faint and backwards
-    view += B(72, 84, 256, 180, '#0C242C') + `<g opacity="0.62">` + R(96, 176, 74, 88, '#1E4450') + R(220, 100, 52, 120, '#1E4450') + P([[220, 100], [246, 86], [272, 100]], '#1E4450') +
-      C(246, 132, 19, '#D5CEB9') + clockFace(246, 132, 19, 12 - s.clock.h, (12 - s.clock.m) % 12) + '</g>' + C(142, 222, 30, 'url(#lampglow)') + flame(142, 232, 16, 'flame');
+    view += B(72, 84, 256, 180, '#0A1F27');   // dark glass; the reflection is laid over it below
   } else {
-    view += seaView(72, 84, 256, 180, 196);
-    [[142, 206], [186, 200], [222, 210]].forEach(([x, y], i) => { view += B(x - 1, y, 2, 6, 'ink') + C(x, y - 2, 2.4, 'moon', `class="twinkle t${i}"`); });
     const rr = rng(5);
     for (let i = 0; i < 14; i++) { const x = 76 + rr() * 250, y = 84 + rr() * 150; view += L(x, y, x - 4, y + 13, 'moon', 0.9, `class="rain" style="animation-delay:${n(-rr() * 1.4)}s"`); }
   }
   if (f.topLit) view += `<path class="sweepband" d="M-60 84 L10 84 L-40 264 L-110 264Z" fill="#FFE08A"/>`;
+  if (!s.lit) {
+    // the sea outside, as rendered: scaled to fill the glass, horizon a little above the middle
+    const S = M3.seawide.anchors, k = gw / 400, top = gy + gh * 0.56 - S.buoy1[1] * k;
+    let sea = `<g transform="translate(${n(gx)} ${n(top)}) scale(${n(k * 1000) / 1000})">${pic('seawide_dark')}</g>`;
+    for (let i = 0; i < 3; i++) sea += C(gx + S['buoy' + i][0] * k, top + S['buoy' + i][1] * k, 2.2, 'moon', `class="twinkle t${i}"`);
+    over += `<g clip-path="url(#panes)">${sea}</g>`;
+  }
   over += `<g clip-path="url(#panes)"><g transform="translate(${n(gx)} ${n(gy)}) scale(${n(gw / 256 * 100) / 100} ${n(gh / 180 * 100) / 100}) translate(-72 -84)">${view}</g></g>`;
+  if (s.lit) {
+    // a lit window is a mirror: the wall behind you, as rendered, the wrong way round
+    const k = gw / 400;
+    over += `<g clip-path="url(#panes)"><g opacity="0.5">${behindYou(s, gx + gw, gy - 96 * k, k)}</g>${lampGhost(gx + gw * 0.2, gy + gh * 0.74, 0.3)}</g>`;
+  }
   if (!f.jarTaken && !s.lit) {
     const j = m.hots.jar;
     over += C(j[0] + j[2] / 2 - 3, j[1] + j[3] / 2 + 6, 1.4, 'phos', 'class="twinkle"') + C(j[0] + j[2] / 2 + 4, j[1] + j[3] / 2 + 12, 1.1, 'phos', 'class="twinkle t1"');
@@ -257,15 +233,36 @@ function r2(s, fx) {
   return { art: a, hots: h, glow: [A.flame[0], A.flame[1], 150], noNight: true, soft: true };
 }
 
+// What stands open or has been taken on the clock wall.
+const w3states = (f) => ({
+  case: f.clockSolved ? (f.drumTaken ? 'empty' : 'drum') : 'closed',
+  box: f.crankFitted ? 'crank' : 'plain',
+  bottle: !f.pageOut ? 'paper' : !f.pageTaken ? 'out' : 'empty',
+  cabinet: !f.lockOpen ? 'closed' : !f.crankTaken && !f.oilTaken ? 'both' : !f.crankTaken ? 'crank' : !f.oilTaken ? 'oil' : 'empty',
+});
+const clockHands = (s, view, extra = '') => {
+  const A = M3[view].anchors, [cx, cy] = A.clock_c, r = A.clock_r[0] - cx;
+  return handAt(cx, cy, s.clock.h, r * 0.5, DARKINK, r * 0.11) + handAt(cx, cy, s.clock.m, r * 0.78, DARKINK, r * 0.06) + extra;
+};
+
+// The clock wall as a mirror shows it: the same rendered picture, flipped left to right.
+// Because the hands are flipped with it, the reflection always shows the real time backwards.
+function behindYou(s, right, top, k) {
+  return `<g transform="translate(${n(right)} ${n(top)}) scale(${n(-k * 1000) / 1000} ${n(k * 1000) / 1000})">` +
+    rendered('wall3', w3states(s.f), s, undefined, true) + clockHands(s, 'wall3') + '</g>';
+}
+
+// The desk lamp, seen in the glass: the rendered lamp, fading out round the edges.
+function lampGhost(x, y, k) {
+  const A = M3.desk.anchors.flame;
+  return `<g transform="translate(${n(x - A[0] * k)} ${n(y - A[1] * k)}) scale(${k})">` +
+    `<radialGradient id="ghostfade" gradientUnits="userSpaceOnUse" cx="${A[0]}" cy="${n(A[1] + 34)}" r="118"><stop offset="0.3" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>` +
+    `<mask id="ghostmask"><rect x="0" y="0" width="400" height="500" fill="url(#ghostfade)"/></mask><g mask="url(#ghostmask)" opacity="0.85">${pic('desk_lit')}</g></g>`;
+}
+
 function r3(s, fx) {
   const f = s.f, A = M3.wall3.anchors;
-  const cab = !f.lockOpen ? 'closed' : !f.crankTaken && !f.oilTaken ? 'both' : !f.crankTaken ? 'crank' : !f.oilTaken ? 'oil' : 'empty';
-  let a = rendered('wall3', {
-    case: f.clockSolved ? (f.drumTaken ? 'empty' : 'drum') : 'closed',
-    box: f.crankFitted ? 'crank' : 'plain',
-    bottle: !f.pageOut ? 'paper' : !f.pageTaken ? 'out' : 'empty',
-    cabinet: cab,
-  }, s, fx);
+  let a = rendered('wall3', w3states(f), s, fx);
   const [cx, cy] = A.clock_c, r = A.clock_r[0] - A.clock_c[0];
   a += `<g opacity="${s.lit ? 1 : 0.4}">` + handAt(cx, cy, s.clock.h, r * 0.5, '#1B1410', r * 0.11) + handAt(cx, cy, s.clock.m, r * 0.78, '#1B1410', r * 0.06) + '</g>';
   let h = hot3('wall3', 'clock') + hot3('wall3', 'cabinet') + hot3('wall3', 'books') + hot3('wall3', 'box') + hot3('wall3', 'bottle');
@@ -314,12 +311,13 @@ function kMirror(s, fx) {
   const A = M3.mirror.anchors;
   const gx = A.glass_a[0], gy = A.glass_a[1], gw = A.glass_b[0] - gx, gh = A.glass_b[1] - gy;
   const a = rendered('mirror', {}, s, fx, true);
-  // the room behind you, backwards: drawn for a 400 x 500 window and stretched onto the glass
-  const view = B(-5, -5, 410, 510, '#0C242C') + `<g opacity="0.72">` + B(0, 0, 400, 500, '#16353E') + R(214, 20, 176, 232, '#1E4450') +
-    C(302, 128, 84, '#2B5663') + C(302, 128, 76, '#D5CEB9') + clockFace(302, 128, 76, 12 - s.clock.h, (12 - s.clock.m) % 12) + C(302, 128, 5, 'brass2') +
-    R(222, 300, 150, 200, '#1E4450') + R(232, 312, 60, 90, '#17363F') + R(302, 312, 60, 90, '#17363F') + R(20, 150, 150, 9, '#1E4450') + R(60, 112, 62, 38, '#7E3229') + '</g>' +
-    C(96, 372, 92, 'url(#lampglow)') + R(74, 400, 44, 14, 'brass2') + C(96, 392, 16, 'brass') + flame(96, 372, 40);
-  const over = panes('mpanes', gx, gy, gw, gh) + `<g clip-path="url(#mpanes)"><g transform="translate(${n(gx)} ${n(gy)}) scale(${n(gw / 400 * 1000) / 1000} ${n(gh / 500 * 1000) / 1000})">${view}</g></g>`;
+  // The room behind you, backwards. The clock sits behind the cross of the frame, as in Grandad's sketch:
+  // the rendered clock, flipped, with its hands flipped along with it.
+  const C3 = M3.clock.anchors, k = 1.18, cx = gx + gw / 2, cy = gy + gh / 2;
+  const clock = `<g transform="translate(${n(cx + C3.clock_c[0] * k)} ${n(cy - C3.clock_c[1] * k)}) scale(${-k} ${k})">` +
+    rendered('clock', { case: w3states(s.f).case }, s, undefined, true) + clockHands(s, 'clock', C(C3.clock_c[0], C3.clock_c[1], 5, 'brass2')) + '</g>';
+  const over = panes('mpanes', gx, gy, gw, gh) + `<g clip-path="url(#mpanes)">` + B(-5, -5, 410, 510, '#0A1F27') +
+    `<g opacity="0.58">${clock}</g>` + lampGhost(gx + gw * 0.2, gy + gh * 0.76, 0.62) + '</g>';
   return { art: a, over, hots: hot('glass', 0, 0, 400, 500), noNight: true, noGlow: true };
 }
 
@@ -395,7 +393,7 @@ function kBox(s, fx) {
     let pins = '';
     PINS.forEach((v, i) => {
       const x = A.pin_a[0] + ((A.pin_e[0] - A.pin_a[0]) * i) / 4, rise = [0, 0.3, 0.64, 1][v] * full;
-      pins += `<g class="pin ${fx === 'play' ? 'play' : ''}" style="--rise:${n(rise)}px;--d:${n(i * 0.6)}s">` + B(x - 2.5, base, 5, full + 10, '#D9A441') + C(x, base, 8, 'paper') + C(x - 2.2, base - 2.2, 2.4, '#FFFFFF', 'opacity="0.7"') + '</g>';
+      pins += `<g class="pin ${fx === 'play' ? 'play' : ''}" style="--rise:${n(rise)}px;--d:${n(i * 0.6)}s">` + B(x - 2.5, base, 5, full + 10, '#D9A441') + `<image href="art3d/part_ball.webp" x="${n(x - 10)}" y="${n(base - 10)}" width="20" height="20"/>` + '</g>';
     });
     a += `<clipPath id="pinclip"><rect x="0" y="0" width="400" height="${n(base + 5)}"/></clipPath><g clip-path="url(#pinclip)">${pins}</g>`;
   }
@@ -416,7 +414,7 @@ function kPanel(s, fx, q) {
       const x = A.slot_a[0] + dx * i, y = A.slot_a[1] + dy * (v - 1);
       for (let lv = 0; lv < 3; lv++) a += L(x - 17, A.slot_a[1] + dy * lv, x - 10, A.slot_a[1] + dy * lv, '#2A1E12', 2.4) + L(x + 10, A.slot_a[1] + dy * lv, x + 17, A.slot_a[1] + dy * lv, '#2A1E12', 2.4);
       const glide = fx === 'slider' && q.at === i ? `class="fx-glide" style="--dy:${n(dy * (q.from - v))}px"` : '';
-      a += `<g ${glide}>` + C(x, y, 15, DARKINK) + C(x, y, 5, 'paper') + S(`M${n(x - 9)} ${n(y - 6)} a11 11 0 0 1 8 -5`, '#6B5A45', 2) + '</g>';
+      a += `<g ${glide}>` + `<image href="art3d/part_knob.webp" x="${n(x - 19)}" y="${n(y - 19)}" width="38" height="38"/>` + '</g>';
       h += hot('slider:' + i, Math.round(x - dx / 2), Math.round(A.slot_b[1] - 28), Math.round(dx), Math.round(A.slot_a[1] - A.slot_b[1] + 56));
     });
   } else if (!f.hkeyTaken) h += hot3('panel', 'hkey');
@@ -465,18 +463,18 @@ function tLamp(s, fx) {
 }
 
 function tOut(s, fx) {
-  const f = s.f, R = M3.top1.rects, lit = !!f.topLit;
-  const a = rendered('top1', {}, s, fx, lit);
+  const f = s.f, m = M3.top1, lit = !!f.topLit, d = beamDir(s);
+  const a = rendered('top1', { sight: lit ? d : 'none' }, s, fx, lit);
   let over = '';
   if (lit) {
     let clip = '<clipPath id="outpanes">';
-    for (const r of Object.values(R)) clip += `<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}"/>`;
-    const dx = { N: -86, E: -54, S: -66, W: -58 }[beamDir(s)];
-    over += clip + '</clipPath><g clip-path="url(#outpanes)"><g transform="translate(40 108) scale(0.8 0.95)">' +
-      `<path class="beam" d="M170 -110 L230 -110 L330 340 L70 340Z" fill="url(#beamD)"/><ellipse cx="200" cy="304" rx="150" ry="34" fill="${K.brass3}" opacity="0.16"/>` +
-      `<g class="fx-sight" transform="translate(${dx} 0)">${sight(beamDir(s))}</g></g></g>`;
+    for (const r of Object.values(m.rects)) clip += `<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}"/>`;
+    const [x, y] = m.anchors['sign_' + d], r = m.anchors['signr_' + d][0] - x;
+    over += clip + '</clipPath><g clip-path="url(#outpanes)">' +
+      `<path class="beam" d="M${n(x - 26)} -10 L${n(x + 26)} -10 L${n(x + 78)} 440 L${n(x - 78)} 440Z" fill="url(#beamD)" opacity="0.55"/>` +
+      `<g class="fx-sight">${sign(SIGHTS[d], x, y, r / 17, DARKINK)}</g></g>`;
   }
-  over += `<g opacity="${lit ? 1 : 0.5}">` + R_(178, 452, 44, 26, '#B98A2A') + R_(182, 456, 36, 18, '#D9A441') + T(200, 471, beamDir(s), 15, '#2A1E12') + '</g>';
+  over += `<g opacity="${lit ? 1 : 0.5}">` + R_(178, 452, 44, 26, '#B98A2A') + R_(182, 456, 36, 18, '#D9A441') + T(200, 471, d, 15, '#2A1E12') + '</g>';
   return { art: a, over, hots: hot('sea', 0, 0, 400, 440), dark: !lit, noNight: true, noGlow: true };
 }
 const R_ = (x, y, w, h, fill) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${fill}"/>`;
@@ -499,7 +497,7 @@ function kRings(s, fx, q) {
 // Every picture file, so the game can fetch them before they are needed.
 export function pictureFiles() {
   const out = ITEM_NAMES.map((i) => `art3d/icon_${i}.webp`);
-  out.push('art3d/bottle_sprite_bottle_lit.webp');
+  out.push('art3d/bottle_sprite_bottle_lit.webp', 'art3d/part_knob.webp', 'art3d/part_ball.webp');
   for (const [view, m] of Object.entries(M3)) {
     for (const tone of m.tones || ['lit', 'dark']) {
       out.push(`art3d/${view}_${tone}.webp`);
